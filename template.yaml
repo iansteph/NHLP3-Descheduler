@@ -1,22 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  AWS
-
-  Sample SAM Template for AWS
-
+Description: SAM template for Descheduler
 
 Resources:
-  HelloWorldFunction:
+  DeschedulerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: HelloWorldFunction
-      Handler: helloworld.App::handleRequest
+      CodeUri: DeschedulerFunction
+      Handler: iansteph.nhlp3.descheduler.handler.DeschedulerHandler::handleRequest
       Runtime: java8
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
-        Variables:
-          PARAM1: VALUE
-      Events:
-        HelloWorld:
-          Type: CloudWatchEvent # More info about CloudWatchEvent Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#cloudwatchevent
-          Properties:
+      Description: Descheduler function for NHLP3 to set play-by-play-processing for games
+      MemorySize: 512
