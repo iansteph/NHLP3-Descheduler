@@ -3,3 +3,5 @@ DechedulerFunction/.aws-sam/*
 .aws-sam/*
 /samconfig.toml
 .idea/workspace.xml
+*.iml
+target
