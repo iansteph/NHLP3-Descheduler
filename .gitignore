@@ -1,6 +1,5 @@
 .idea/*
-*.iml
+DechedulerFunction/.aws-sam/*
 .aws-sam/*
-target
-dependency-reduced-pom.xml
 /samconfig.toml
+.idea/workspace.xml
