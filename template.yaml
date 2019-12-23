@@ -11,3 +11,85 @@ Resources:
       Runtime: java8
       Description: Descheduler function for NHLP3 to set play-by-play-processing for games
       MemorySize: 512
+      Role:
+        Fn::GetAtt:
+          - DeschedulerFunctionExecutionRole
+          - Arn
+
+  DeschedulerFunctionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: NHLP3-Descheduler-Execution-Role
+      Description: IAM Role assumed when invoking the Descheduler lambda function
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DeschedulerFunctionPolicyDocument
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - events:ListTargetsByRule
+                  - events:RemoveTargets
+                  - events:DeleteRule
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource:
+                  Fn::GetAtt:
+                    - DeschedulingQueue
+                    - Arn
+
+  DeschedulingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: NHLP3-Descheduling
+
+  DeschedulingQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - Ref: DeschedulingQueue
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                Fn::GetAtt:
+                  - DeschedulerFunctionExecutionRole
+                  - Arn
+
+  NHLP3PlayByPlayGameFinalEventSnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: arn:aws:sns:us-east-1:627812672245:NHLP3-Play-by-Play-Events-prod
+      Protocol: lambda
+      Endpoint:
+        Fn::GetAtt:
+          - DeschedulerFunction
+          - Arn
+      FilterPolicy:
+        eventTypeId:
+          - GAME_OFFICIAL
+
+  EventPublisherFunctionLambaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Fn::GetAtt:
+          - DeschedulerFunction
+          - Arn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: 'arn:aws:events:us-east-1:627812672245:rule/GameId-*'
