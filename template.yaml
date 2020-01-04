@@ -64,6 +64,7 @@ Resources:
           Fn::GetAtt:
             - DeschedulingQueueDlq
             - Arn
+        maxReceiveCount: 5
 
   DeschedulingQueuePolicy:
     Type: AWS::SQS::QueuePolicy
