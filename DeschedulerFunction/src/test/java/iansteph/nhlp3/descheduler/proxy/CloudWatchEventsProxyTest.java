@@ -13,9 +13,10 @@ import software.amazon.awssdk.services.cloudwatchevents.model.Target;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,7 +46,7 @@ public class CloudWatchEventsProxyTest {
         final List<Target> targets =  cloudWatchEventsProxy.listTargetsByRule("someRuleName");
 
         verify(mockCloudWatchEventsClient, times(1)).listTargetsByRule(any(ListTargetsByRuleRequest.class));
-        assertThat(targets, isNotNull());
+        assertThat(targets, is(notNullValue()));
     }
 
     @Test
