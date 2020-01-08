@@ -115,7 +115,7 @@ Resources:
         eventTypeId:
           - GAME_OFFICIAL
 
-  GameIdCloudWatchEventRuleTriggerLambaPermission:
+  EventPublisherSnsTopicTriggerLambaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName:
@@ -123,8 +123,8 @@ Resources:
           - DeschedulerFunction
           - Arn
       Action: lambda:InvokeFunction
-      Principal: events.amazonaws.com
-      SourceArn: 'arn:aws:events:us-east-1:627812672245:rule/GameId-*'
+      Principal: sns.amazonaws.com
+      SourceArn: arn:aws:sns:us-east-1:627812672245:NHLP3-Play-by-Play-Events-prod
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html
   DeschedulingQueueSqsEventSourceMapping:
