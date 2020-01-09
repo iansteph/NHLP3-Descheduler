@@ -112,6 +112,7 @@ public class DeschedulerHandler implements RequestHandler<DeschedulerEvent, Obje
 
             checkNotNull(deschedulerEvent, "DeschedulerEvent cannot be null");
             final List<Record> records = deschedulerEvent.getRecords();
+            checkNotNull(records, "List of records in DeschedulerEvent cannot be null");
             records.forEach(record -> checkNotNull(record, "Record in DeschedulerEvent cannot be null"));
             checkArgument(records.size() == 1, "DeschedulerEvent record list size should (and is configured) to be 1");
         }
