@@ -1,19 +1,19 @@
-package iansteph.nhlp3.descheduler.model.event.record;
+package iansteph.nhlp3.descheduler.model.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import iansteph.nhlp3.descheduler.model.event.Record;
-import iansteph.nhlp3.descheduler.model.event.record.sqs.MessageAttribute;
+import iansteph.nhlp3.descheduler.model.event.sqsrecord.Attributes;
+import iansteph.nhlp3.descheduler.model.event.sqsrecord.MessageAttribute;
 
 import java.util.Map;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SqsRecord extends Record {
+public class SqsRecord implements Record {
 
     private String messageId;
     private String receiptHandle;
     private String body;
-    private Map<String, String> attributes;
+    private Attributes attributes;
     private Map<String, MessageAttribute> messageAttributes;
     private String md5OfBody;
     private String eventSource;
@@ -21,7 +21,7 @@ public class SqsRecord extends Record {
     private String awsRegion;
 
     @Override
-    public String getPlayEventAsString() {
+    public String getPlayEventString() {
 
         return body;
     }
@@ -56,12 +56,12 @@ public class SqsRecord extends Record {
         this.body = body;
     }
 
-    public Map<String, String> getAttributes() {
+    public Attributes getAttributes() {
 
         return attributes;
     }
 
-    public void setAttributes(final Map<String, String> attributes) {
+    public void setAttributes(final Attributes attributes) {
 
         this.attributes = attributes;
     }

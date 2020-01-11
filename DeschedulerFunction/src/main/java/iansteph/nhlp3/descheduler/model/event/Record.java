@@ -1,6 +1,6 @@
 package iansteph.nhlp3.descheduler.model.event;
 
-public abstract class Record {
+public interface Record {
 
-    public abstract String getPlayEventAsString() throws NullPointerException;
+    String getPlayEventString();
 }

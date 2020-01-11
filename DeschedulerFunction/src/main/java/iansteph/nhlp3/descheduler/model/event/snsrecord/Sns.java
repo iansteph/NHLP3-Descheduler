@@ -1,4 +1,4 @@
-package iansteph.nhlp3.descheduler.model.event.record.sns;
+package iansteph.nhlp3.descheduler.model.event.snsrecord;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -16,6 +16,7 @@ public class Sns {
     private String message;
     private Map<String, MessageAttribute> messageAttributes;
     private String type;
+    private String unsubscribeUrl;
     private String topicArn;
     private String subject;
 
@@ -99,6 +100,16 @@ public class Sns {
         this.type = type;
     }
 
+    public String getUnsubscribeUrl() {
+
+        return unsubscribeUrl;
+    }
+
+    public void setUnsubscribeUrl(final String unsubscribeUrl) {
+
+        this.unsubscribeUrl = unsubscribeUrl;
+    }
+
     public String getTopicArn() {
 
         return topicArn;
@@ -131,6 +142,7 @@ public class Sns {
                 ", message='" + message + '\'' +
                 ", messageAttributes=" + messageAttributes +
                 ", type='" + type + '\'' +
+                ", unsubscribeUrl='" + unsubscribeUrl + '\'' +
                 ", topicArn='" + topicArn + '\'' +
                 ", subject='" + subject + '\'' +
                 '}';
@@ -150,6 +162,7 @@ public class Sns {
                 Objects.equals(message, sns.message) &&
                 Objects.equals(messageAttributes, sns.messageAttributes) &&
                 Objects.equals(type, sns.type) &&
+                Objects.equals(unsubscribeUrl, sns.unsubscribeUrl) &&
                 Objects.equals(topicArn, sns.topicArn) &&
                 Objects.equals(subject, sns.subject);
     }
@@ -157,7 +170,7 @@ public class Sns {
     @Override
     public int hashCode() {
 
-        return Objects.hash(signatureVersion, timestamp, signature, signingCertUrl, messageId, message, messageAttributes, type, topicArn,
-                subject);
+        return Objects.hash(signatureVersion, timestamp, signature, signingCertUrl, messageId, message, messageAttributes, type,
+                unsubscribeUrl, topicArn, subject);
     }
 }

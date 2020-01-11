@@ -8,15 +8,15 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlayEvent {
 
-    private int gamePk;
+    private Integer gamePk;
     private Play play;
 
-    public int getGamePk() {
+    public Integer getGamePk() {
 
         return gamePk;
     }
 
-    public void setGamePk(final int gamePk) {
+    public void setGamePk(final Integer gamePk) {
 
         this.gamePk = gamePk;
     }
@@ -58,7 +58,7 @@ public class PlayEvent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PlayEvent playEvent = (PlayEvent) o;
-        return gamePk == playEvent.gamePk &&
+        return Objects.equals(gamePk, playEvent.gamePk) &&
                 Objects.equals(play, playEvent.play);
     }
 

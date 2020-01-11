@@ -1,4 +1,4 @@
-package iansteph.nhlp3.descheduler.model.event.record.sqs;
+package iansteph.nhlp3.descheduler.model.event.snsrecord;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

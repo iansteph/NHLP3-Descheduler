@@ -1,29 +1,37 @@
-package iansteph.nhlp3.descheduler.model.event.record;
+package iansteph.nhlp3.descheduler.model.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import iansteph.nhlp3.descheduler.model.event.Record;
-import iansteph.nhlp3.descheduler.model.event.record.sns.Sns;
+import iansteph.nhlp3.descheduler.model.event.snsrecord.Sns;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SnsRecord extends Record {
+public class SnsRecord implements Record {
+
+    private static final Logger logger = LogManager.getLogger(SnsRecord.class);
 
     private String eventVersion;
     private String eventSubscriptionArn;
     private String eventSource;
     private Sns sns;
-    private String type;
-    private String topicArn;
-    private String subject;
 
     @Override
-    public String getPlayEventAsString() {
+    public String getPlayEventString() {
 
-        checkNotNull(sns, "SnsRecord cannot contain null Sns object");
-        return sns.getMessage();
+        try {
+
+            checkNotNull(sns, "Sns in SnsRecord cannot be null");
+            return sns.getMessage();
+        }
+        catch (NullPointerException e) {
+
+            logger.error(e);
+            throw e;
+        }
     }
 
     public String getEventVersion() {
@@ -66,36 +74,6 @@ public class SnsRecord extends Record {
         this.sns = sns;
     }
 
-    public String getType() {
-
-        return type;
-    }
-
-    public void setType(final String type) {
-
-        this.type = type;
-    }
-
-    public String getTopicArn() {
-
-        return topicArn;
-    }
-
-    public void setTopicArn(final String topicArn) {
-
-        this.topicArn = topicArn;
-    }
-
-    public String getSubject() {
-
-        return subject;
-    }
-
-    public void setSubject(final String subject) {
-
-        this.subject = subject;
-    }
-
     @Override
     public String toString() {
 
@@ -104,9 +82,6 @@ public class SnsRecord extends Record {
                 ", eventSubscriptionArn='" + eventSubscriptionArn + '\'' +
                 ", eventSource='" + eventSource + '\'' +
                 ", sns=" + sns +
-                ", type='" + type + '\'' +
-                ", topicArn='" + topicArn + '\'' +
-                ", subject='" + subject + '\'' +
                 '}';
     }
 
@@ -119,15 +94,12 @@ public class SnsRecord extends Record {
         return Objects.equals(eventVersion, snsRecord.eventVersion) &&
                 Objects.equals(eventSubscriptionArn, snsRecord.eventSubscriptionArn) &&
                 Objects.equals(eventSource, snsRecord.eventSource) &&
-                Objects.equals(sns, snsRecord.sns) &&
-                Objects.equals(type, snsRecord.type) &&
-                Objects.equals(topicArn, snsRecord.topicArn) &&
-                Objects.equals(subject, snsRecord.subject);
+                Objects.equals(sns, snsRecord.sns);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(eventVersion, eventSubscriptionArn, eventSource, sns, type, topicArn, subject);
+        return Objects.hash(eventVersion, eventSubscriptionArn, eventSource, sns);
     }
 }

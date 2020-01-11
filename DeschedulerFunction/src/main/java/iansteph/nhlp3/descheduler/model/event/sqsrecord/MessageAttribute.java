@@ -1,4 +1,4 @@
-package iansteph.nhlp3.descheduler.model.event.record.sns;
+package iansteph.nhlp3.descheduler.model.event.sqsrecord;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -33,7 +33,7 @@ public class MessageAttribute {
     @Override
     public String toString() {
 
-        return "MessageAttributes{" +
+        return "MessageAttribute{" +
                 "type='" + type + '\'' +
                 ", value='" + value + '\'' +
                 '}';

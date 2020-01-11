@@ -2,29 +2,36 @@ package iansteph.nhlp3.descheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import iansteph.nhlp3.descheduler.model.event.DeschedulerEvent;
-import iansteph.nhlp3.descheduler.model.event.Record;
-import iansteph.nhlp3.descheduler.model.event.record.SnsRecord;
-import iansteph.nhlp3.descheduler.model.event.record.SqsRecord;
-import iansteph.nhlp3.descheduler.model.event.record.sns.Sns;
+import iansteph.nhlp3.descheduler.model.event.SnsDeschedulerEvent;
+import iansteph.nhlp3.descheduler.model.event.SnsRecord;
+import iansteph.nhlp3.descheduler.model.event.SqsDeschedulerEvent;
+import iansteph.nhlp3.descheduler.model.event.SqsRecord;
+import iansteph.nhlp3.descheduler.model.event.snsrecord.Sns;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class UnitTestBase {
 
-    public static DeschedulerEvent DeschedulerEventWithSnsRecord =
-            createDeschedulerEventWithRecords(Collections.singletonList(createSnsRecord(getPlayEventAsStringFromTestResource())));
-    public static DeschedulerEvent DeschedulerEventWithSqsRecord =
-            createDeschedulerEventWithRecords(Collections.singletonList(createSqsRecord(getPlayEventAsStringFromTestResource())));
+    public static SnsDeschedulerEvent SnsDeschedulerEvent = createSnsDeschedulerEventWithPlayEvent(getPlayEventAsStringFromTestResource());
+    public static String SnsDeschedulerEventAsString = getTestResourceAsString("sns-descheduler-event-with-play-event.txt");
+    public static String SqsDeschedulerEventAsString = getTestResourceAsString("sqs-descheduler-event-with-play-event.txt");
+    public static SqsDeschedulerEvent SqsDeschedulerEvent = createSqsDeschedulerEventWithPlayEvent(getPlayEventAsStringFromTestResource());
 
-    public static String getPlayEventAsStringFromTestResource() {
+    private static String getPlayEventAsStringFromTestResource() {
+
+        return getTestResourceAsString("play-event.txt");
+    }
+
+    private static String getTestResourceAsString(final String filename) {
 
         try {
 
             final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-            final File playEventTestResourceFile = new File("src/test/resources/play-event.txt");
+            final File playEventTestResourceFile = new File(format("src/test/resources/%s", filename));
             final String playEventAsString = objectMapper.readValue(playEventTestResourceFile, String.class);
             return playEventAsString;
         }
@@ -43,26 +50,25 @@ public class UnitTestBase {
         }
     }
 
-    private static DeschedulerEvent createDeschedulerEventWithRecords(final List<Record> records) {
-
-        final DeschedulerEvent deschedulerEvent = new DeschedulerEvent();
-        deschedulerEvent.setRecords(records);
-        return deschedulerEvent;
-    }
-
-    private static Record createSnsRecord(final String message) {
+    private static SnsDeschedulerEvent createSnsDeschedulerEventWithPlayEvent(final String playEventString) {
 
         final Sns sns = new Sns();
-        sns.setMessage(message);
+        sns.setMessage(playEventString);
         final SnsRecord snsRecord = new SnsRecord();
         snsRecord.setSns(sns);
-        return snsRecord;
+        final List<SnsRecord> records = Collections.singletonList(snsRecord);
+        final SnsDeschedulerEvent snsDeschedulerEvent = new SnsDeschedulerEvent();
+        snsDeschedulerEvent.setRecords(records);
+        return snsDeschedulerEvent;
     }
 
-    private static Record createSqsRecord(final String body) {
+    private static SqsDeschedulerEvent createSqsDeschedulerEventWithPlayEvent(final String playEventString) {
 
         final SqsRecord sqsRecord = new SqsRecord();
-        sqsRecord.setBody(body);
-        return sqsRecord;
+        sqsRecord.setBody(playEventString);
+        final List<SqsRecord> records = Collections.singletonList(sqsRecord);
+        final SqsDeschedulerEvent sqsDeschedulerEvent = new SqsDeschedulerEvent();
+        sqsDeschedulerEvent.setRecords(records);
+        return sqsDeschedulerEvent;
     }
 }

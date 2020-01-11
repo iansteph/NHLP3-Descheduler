@@ -7,6 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import iansteph.nhlp3.descheduler.model.event.DeschedulerEvent;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
 import iansteph.nhlp3.descheduler.model.event.Record;
+import iansteph.nhlp3.descheduler.model.event.SnsDeschedulerEvent;
+import iansteph.nhlp3.descheduler.model.event.SqsDeschedulerEvent;
 import iansteph.nhlp3.descheduler.proxy.CloudWatchEventsProxy;
 import iansteph.nhlp3.descheduler.proxy.SqsProxy;
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +34,7 @@ import static java.lang.String.format;
 /**
  * Handler for requests to Lambda function.
  */
-public class DeschedulerHandler implements RequestHandler<DeschedulerEvent, Object> {
+public class DeschedulerHandler implements RequestHandler<String, Object> {
 
     private final CloudWatchEventsProxy cloudWatchEventsProxy;
     private final SqsProxy sqsProxy;
@@ -79,9 +81,11 @@ public class DeschedulerHandler implements RequestHandler<DeschedulerEvent, Obje
         this.sqsProxy = sqsProxy;
     }
 
-    public PlayEvent handleRequest(final DeschedulerEvent deschedulerEvent, final Context context) {
+    public PlayEvent handleRequest(final String deschedulerEventAsString, final Context context) {
 
-        final PlayEvent playEvent = preProcessDeschedulerEvent(deschedulerEvent);
+        final DeschedulerEvent deschedulerEvent = preProcessDeschedulerEvent(deschedulerEventAsString);
+        final String playEventString = deschedulerEvent.getPlayEventString();
+        final PlayEvent playEvent = preProcessPlayEvent(playEventString);
         logger.info(format("Processing GameId %d and PlayEvent %s", playEvent.getGamePk(), playEvent));
         final String ruleName = "GameId-" + playEvent.getGamePk();
         final List<Target> targets = cloudWatchEventsProxy.listTargetsByRule(ruleName);
@@ -100,38 +104,24 @@ public class DeschedulerHandler implements RequestHandler<DeschedulerEvent, Obje
         return playEvent;
     }
 
-    private PlayEvent preProcessDeschedulerEvent(final DeschedulerEvent deschedulerEvent) {
+    private DeschedulerEvent preProcessDeschedulerEvent(final String deschedulerEventAsString) {
 
+        logger.info(format("DeschedulerEventAsString: %s", deschedulerEventAsString));
+        final DeschedulerEvent deschedulerEvent = deserializeDeschedulerEvent(deschedulerEventAsString);
         validateDeschedulerEvent(deschedulerEvent);
-        return deserializePlayEvent(deschedulerEvent);
+        return deschedulerEvent;
     }
 
-    private void validateDeschedulerEvent(final DeschedulerEvent deschedulerEvent) {
+    private DeschedulerEvent deserializeDeschedulerEvent(final String deschedulerEventAsString) {
 
         try {
 
-            checkNotNull(deschedulerEvent, "DeschedulerEvent cannot be null");
-            final List<Record> records = deschedulerEvent.getRecords();
-            checkNotNull(records, "List of records in DeschedulerEvent cannot be null");
-            records.forEach(record -> checkNotNull(record, "Record in DeschedulerEvent cannot be null"));
-            checkArgument(records.size() == 1, "DeschedulerEvent record list size should (and is configured) to be 1");
-        }
-        catch (NullPointerException | IllegalArgumentException e) {
-
-            logger.error(e);
-            throw e;
-        }
-    }
-
-    private PlayEvent deserializePlayEvent(final DeschedulerEvent deschedulerEvent) {
-
-        try {
-
-            // SnsRecords always have a batch size of 1, and the SQS event source trigger has the batch size configured to 1
-            final String playEventAsString = deschedulerEvent.getRecords().get(0).getPlayEventAsString();
-            checkNotNull(playEventAsString, "PlayEventString cannot be null");
-            logger.info(format("Deserializing playEventString into PlayEvent object for playEventString %s", playEventAsString));
-            return objectMapper.readValue(playEventAsString, PlayEvent.class);
+            checkNotNull(deschedulerEventAsString, "DeschedulerEventAsString cannot be null");
+            final Class<? extends DeschedulerEvent> deserializationTargetClass =
+                    identifyDeschedulerEventImplementation(deschedulerEventAsString);
+            final DeschedulerEvent deschedulerEvent = objectMapper.readValue(deschedulerEventAsString, deserializationTargetClass);
+            logger.info(format("Deserialized DeschedulerEventString: %s", deschedulerEvent));
+            return deschedulerEvent;
         }
         catch (NullPointerException e) {
 
@@ -142,6 +132,90 @@ public class DeschedulerHandler implements RequestHandler<DeschedulerEvent, Obje
 
             logger.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private Class<? extends DeschedulerEvent> identifyDeschedulerEventImplementation(final String deschedulerEventAsString) {
+
+        final String normalizedDeschedulerEventAsString = deschedulerEventAsString.replace(" ", "").toLowerCase();
+        if (normalizedDeschedulerEventAsString.contains("\"eventsource\":\"aws:sns\"")) {
+
+            logger.info("DeschedulerEvent implementation target class identified as SnsDeschedulerEvent");
+            return SnsDeschedulerEvent.class;
+        }
+        else if(normalizedDeschedulerEventAsString.contains("\"eventsource\":\"aws:sqs\"")) {
+
+            logger.info("DeschedulerEvent implementation target class identified as SqsDeschedulerEvent");
+            return SqsDeschedulerEvent.class;
+        }
+        else {
+
+            final RuntimeException runtimeException = new RuntimeException(format("Cannot identify implementation to deserialize to for " +
+                    "the given DeschedulerEventAsString: %s", deschedulerEventAsString));
+            logger.error(runtimeException);
+            throw runtimeException;
+        }
+    }
+
+    private void validateDeschedulerEvent(final DeschedulerEvent deschedulerEvent) {
+
+        try {
+
+            checkNotNull(deschedulerEvent, "DeschedulerEvent cannot be null");
+            final List<? extends Record> records = deschedulerEvent.getRecords();
+            checkNotNull(records, "List of Records in DeschedulerEvent cannot be null");
+            records.forEach(record -> checkNotNull(record, "Record in DeschedulerEvent cannot be null"));
+            // SnsRecords always have a batch size of 1, and the SQS event source trigger has the batch size configured to 1
+            checkArgument(records.size() == 1, "DeschedulerEvent's Records' list size should be (and is " +
+                    "configured) to be 1");
+        }
+        catch (NullPointerException | IllegalArgumentException e) {
+
+            logger.error(e);
+            throw e;
+        }
+    }
+
+    private PlayEvent preProcessPlayEvent(final String playEventString) {
+
+        final PlayEvent playEvent = deserializePlayEvent(playEventString);
+        validatePlayEvent(playEvent);
+        return playEvent;
+    }
+
+    private PlayEvent deserializePlayEvent(final String playEventString) {
+
+        try {
+
+            checkNotNull(playEventString, "PlayEventString cannot be null");
+            final PlayEvent playEvent = objectMapper.readValue(playEventString, PlayEvent.class);
+            logger.info(format("Deserialized PlayEventString: %s", playEvent));
+            return playEvent;
+        }
+        catch (NullPointerException e) {
+
+            logger.error(e);
+            throw e;
+        }
+        catch (IOException e) {
+
+            logger.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void validatePlayEvent(final PlayEvent playEvent) {
+
+        try {
+
+            checkNotNull(playEvent, "Deserialized PlayEvent cannot be null");
+            final Integer gamePk = playEvent.getGamePk();
+            checkNotNull(gamePk, "PlayEvent's gamePk cannot be null");
+        }
+        catch (NullPointerException e) {
+
+            logger.error(e);
+            throw e;
         }
     }
 }
