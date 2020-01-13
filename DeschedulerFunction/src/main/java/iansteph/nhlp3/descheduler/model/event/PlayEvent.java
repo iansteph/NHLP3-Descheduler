@@ -11,6 +11,12 @@ public class PlayEvent {
     private Integer gamePk;
     private Play play;
 
+    public PlayEvent() {}
+
+    public PlayEvent(final int gamePk) {
+        this.gamePk = gamePk;
+    }
+
     public Integer getGamePk() {
 
         return gamePk;
