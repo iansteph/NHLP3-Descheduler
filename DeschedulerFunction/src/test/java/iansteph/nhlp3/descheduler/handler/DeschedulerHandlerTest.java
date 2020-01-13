@@ -2,6 +2,7 @@ package iansteph.nhlp3.descheduler.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import iansteph.nhlp3.descheduler.UnitTestBase;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
@@ -32,8 +33,8 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     private final DeschedulerHandler deschedulerHandler = new DeschedulerHandler(mockCloudWatchEventsProxy, objectMapper, mockSqsProxy);
 
     private static final String DefaultSqsDeschedulerEventString = "{\"Records\":[{\"eventSource\":\"aws:sqs\",\"body\":\"someBody\"}]}";
-    public static final JsonNode SnsDeschedulerEventJson = getTestResourceAsJsonNode("sns-descheduler-event-with-play-event.json");
-    public static final JsonNode SqsDeschedulerEventJson = getTestResourceAsJsonNode("sqs-descheduler-event-with-play-event.json");
+    public static final ObjectNode SnsDeschedulerEventJson = getTestResourceAsJsonNode("sns-descheduler-event-with-play-event.json");
+    public static final ObjectNode SqsDeschedulerEventJson = getTestResourceAsJsonNode("sqs-descheduler-event-with-play-event.json");
 
     @Test(expected = NullPointerException.class)
     public void test_handleRequest_throws_NullPointerException_when_descheduler_event_json_is_null() {
@@ -49,8 +50,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = NullPointerException.class)
     public void test_handleRequest_throws_NullPointerException_when_descheduler_event_json_does_not_have_list_of_records() throws IOException {
 
-        final String inputJsonString = "{\"someKey\":\"someValue\"}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"someKey\":\"someValue\"}", ObjectNode.class);
 
         deschedulerHandler.handleRequest(inputJson, null);
 
@@ -63,8 +63,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = IllegalArgumentException.class)
     public void test_handleRequest_throws_NullPointerException_when_descheduler_event_json_has_null_list_of_records() throws IOException {
 
-        final String inputJsonString = "{\"Records\":null}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"Records\":null}", ObjectNode.class);
 
         deschedulerHandler.handleRequest(inputJson, null);
 
@@ -77,8 +76,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = IllegalArgumentException.class)
     public void test_handleRequest_throws_IllegalArgumentException_when_descheduler_event_json_list_of_records_has_size_not_equal_to_one() throws IOException {
 
-        final String inputJsonString = "{\"Records\":[{\"key\":\"value\"},{\"key\":\"value\"}]}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"Records\":[{\"key\":\"value\"},{\"key\":\"value\"}]}", ObjectNode.class);
 
         deschedulerHandler.handleRequest(inputJson, null);
 
@@ -91,8 +89,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = IllegalArgumentException.class)
     public void test_handleRequest_throws_NullPointerException_when_descheduler_event_json_has_null_record_in_list_of_records() throws IOException {
 
-        final String inputJsonString = "{\"Records\":[null]}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"Records\":[null]}", ObjectNode.class);
 
          deschedulerHandler.handleRequest(inputJson, null);
 
@@ -105,8 +102,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = RuntimeException.class)
     public void test_handleRequest_throws_RuntimeException_when_descheduler_event_json_does_not_contain_event_source() throws IOException {
 
-        final String inputJsonString = "{\"Records\":[{\"key\":\"value\"}]}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"Records\":[{\"key\":\"value\"}]}", ObjectNode.class);
 
         deschedulerHandler.handleRequest(inputJson, null);
 
@@ -119,8 +115,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = IllegalArgumentException.class)
     public void test_handleRequest_throws_RuntimeException_when_descheduler_event_json_contains_null_event_source() throws IOException {
 
-        final String inputJsonString = "{\"Records\":[{\"EventSource\":null}]}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"Records\":[{\"EventSource\":null}]}", ObjectNode.class);
 
         deschedulerHandler.handleRequest(inputJson, null);
 
@@ -133,8 +128,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = RuntimeException.class)
     public void test_handleRequest_throws_RuntimeException_when_event_source_does_not_match_sns_or_sqs() throws IOException {
 
-        final String inputJsonString = "{\"Records\":[{\"EventSource\":\"notSnsOrSqs\"}]}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"Records\":[{\"EventSource\":\"notSnsOrSqs\"}]}", ObjectNode.class);
 
         deschedulerHandler.handleRequest(inputJson, null);
 
@@ -147,8 +141,8 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = NullPointerException.class)
     public void test_handleRequest_throws_NullPointerException_when_play_event_string_is_null() throws IOException {
 
-        final String inputJsonString = "{\"Records\":[{\"EventSource\":\"aws:sqs\",\"Body\":null}]}";
-        final JsonNode inputJson = objectMapper.readTree(inputJsonString);
+        final ObjectNode inputJson = objectMapper.readValue("{\"Records\":[{\"EventSource\":\"aws:sqs\",\"Body\":null}]}",
+                ObjectNode.class);
 
         deschedulerHandler.handleRequest(inputJson, null);
 
@@ -161,7 +155,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
     @Test(expected = RuntimeException.class)
     public void test_handleRequest_catches_IOException_when_play_event_deserialization_fails_and_throws_RuntimeException() throws IOException {
 
-        deschedulerHandler.handleRequest(objectMapper.readTree(DefaultSqsDeschedulerEventString), null);
+        deschedulerHandler.handleRequest(objectMapper.readValue(DefaultSqsDeschedulerEventString, ObjectNode.class), null);
 
         verify(mockCloudWatchEventsProxy, never()).listTargetsByRule(anyString());
         verify(mockCloudWatchEventsProxy, never()).deleteRule(anyString());
@@ -175,7 +169,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
         final ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
         final DeschedulerHandler deschedulerHandler = new DeschedulerHandler(mockCloudWatchEventsProxy, mockObjectMapper, mockSqsProxy);
 
-        deschedulerHandler.handleRequest(objectMapper.readTree(DefaultSqsDeschedulerEventString), null);
+        deschedulerHandler.handleRequest(objectMapper.readValue(DefaultSqsDeschedulerEventString, ObjectNode.class), null);
 
         verify(mockCloudWatchEventsProxy, never()).listTargetsByRule(anyString());
         verify(mockCloudWatchEventsProxy, never()).deleteRule(anyString());
@@ -190,7 +184,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
         when(mockObjectMapper.readValue(anyString(), eq(PlayEvent.class))).thenReturn(new PlayEvent());
         final DeschedulerHandler deschedulerHandler = new DeschedulerHandler(mockCloudWatchEventsProxy, mockObjectMapper, mockSqsProxy);
 
-        deschedulerHandler.handleRequest(objectMapper.readTree(DefaultSqsDeschedulerEventString), null);
+        deschedulerHandler.handleRequest(objectMapper.readValue(DefaultSqsDeschedulerEventString, ObjectNode.class), null);
 
         verify(mockCloudWatchEventsProxy, never()).listTargetsByRule(anyString());
         verify(mockCloudWatchEventsProxy, never()).deleteRule(anyString());
@@ -206,7 +200,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
         when(mockCloudWatchEventsProxy.listTargetsByRule(anyString())).thenThrow(SdkException.builder().build());
         final DeschedulerHandler deschedulerHandler = new DeschedulerHandler(mockCloudWatchEventsProxy, mockObjectMapper, mockSqsProxy);
 
-        deschedulerHandler.handleRequest(objectMapper.readTree(DefaultSqsDeschedulerEventString), null);
+        deschedulerHandler.handleRequest(objectMapper.readValue(DefaultSqsDeschedulerEventString, ObjectNode.class), null);
 
         verify(mockCloudWatchEventsProxy, times(1)).listTargetsByRule(anyString());
         verify(mockCloudWatchEventsProxy, never()).deleteRule(anyString());
@@ -223,7 +217,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
         doThrow(SdkException.builder().build()).when(mockCloudWatchEventsProxy).deleteRule(anyString());
         final DeschedulerHandler deschedulerHandler = new DeschedulerHandler(mockCloudWatchEventsProxy, mockObjectMapper, mockSqsProxy);
 
-        deschedulerHandler.handleRequest(objectMapper.readTree(DefaultSqsDeschedulerEventString), null);
+        deschedulerHandler.handleRequest(objectMapper.readValue(DefaultSqsDeschedulerEventString, ObjectNode.class), null);
 
         verify(mockCloudWatchEventsProxy, times(1)).listTargetsByRule(anyString());
         verify(mockCloudWatchEventsProxy, times(1)).deleteRule(anyString());
@@ -240,7 +234,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
         doThrow(SdkException.builder().build()).when(mockCloudWatchEventsProxy).removeTargets(anyString());
         final DeschedulerHandler deschedulerHandler = new DeschedulerHandler(mockCloudWatchEventsProxy, mockObjectMapper, mockSqsProxy);
 
-        deschedulerHandler.handleRequest(objectMapper.readTree(DefaultSqsDeschedulerEventString), null);
+        deschedulerHandler.handleRequest(objectMapper.readValue(DefaultSqsDeschedulerEventString, ObjectNode.class), null);
 
         verify(mockCloudWatchEventsProxy, times(1)).listTargetsByRule(anyString());
         verify(mockCloudWatchEventsProxy, never()).deleteRule(anyString());
@@ -257,7 +251,7 @@ public class DeschedulerHandlerTest extends UnitTestBase {
         doThrow(SdkException.builder().build()).when(mockSqsProxy).sendMessage(any(PlayEvent.class));
         final DeschedulerHandler deschedulerHandler = new DeschedulerHandler(mockCloudWatchEventsProxy, mockObjectMapper, mockSqsProxy);
 
-        deschedulerHandler.handleRequest(objectMapper.readTree(DefaultSqsDeschedulerEventString), null);
+        deschedulerHandler.handleRequest(objectMapper.readValue(DefaultSqsDeschedulerEventString, ObjectNode.class), null);
 
         verify(mockCloudWatchEventsProxy, times(1)).listTargetsByRule(anyString());
         verify(mockCloudWatchEventsProxy, never()).deleteRule(anyString());

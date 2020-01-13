@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
 import iansteph.nhlp3.descheduler.proxy.CloudWatchEventsProxy;
@@ -31,7 +32,7 @@ import static java.lang.String.format;
 /**
  * Handler for requests to Lambda function.
  */
-public class DeschedulerHandler implements RequestHandler<JsonNode, Object> {
+public class DeschedulerHandler implements RequestHandler<ObjectNode, Object> {
 
     private final CloudWatchEventsProxy cloudWatchEventsProxy;
     private final SqsProxy sqsProxy;
@@ -80,7 +81,7 @@ public class DeschedulerHandler implements RequestHandler<JsonNode, Object> {
         this.sqsProxy = sqsProxy;
     }
 
-    public PlayEvent handleRequest(final JsonNode deschedulerEventJson, final Context context) {
+    public PlayEvent handleRequest(final ObjectNode deschedulerEventJson, final Context context) {
 
         final String playEventString = getPlayEventStringFromDeschedulerEventJson(deschedulerEventJson);
         final PlayEvent playEvent = preProcessPlayEvent(playEventString);
