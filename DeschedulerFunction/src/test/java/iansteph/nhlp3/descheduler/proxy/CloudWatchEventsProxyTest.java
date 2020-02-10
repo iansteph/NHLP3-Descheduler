@@ -5,17 +5,9 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.cloudwatchevents.CloudWatchEventsClient;
 import software.amazon.awssdk.services.cloudwatchevents.model.DeleteRuleRequest;
 import software.amazon.awssdk.services.cloudwatchevents.model.DeleteRuleResponse;
-import software.amazon.awssdk.services.cloudwatchevents.model.ListTargetsByRuleRequest;
-import software.amazon.awssdk.services.cloudwatchevents.model.ListTargetsByRuleResponse;
 import software.amazon.awssdk.services.cloudwatchevents.model.RemoveTargetsRequest;
 import software.amazon.awssdk.services.cloudwatchevents.model.RemoveTargetsResponse;
-import software.amazon.awssdk.services.cloudwatchevents.model.Target;
 
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -26,28 +18,6 @@ public class CloudWatchEventsProxyTest {
 
     private final CloudWatchEventsClient mockCloudWatchEventsClient = mock(CloudWatchEventsClient.class);
     private final CloudWatchEventsProxy cloudWatchEventsProxy = new CloudWatchEventsProxy(mockCloudWatchEventsClient);
-
-    @Test
-    public void test_listRulesByRule_is_successful() {
-
-        when(mockCloudWatchEventsClient.listTargetsByRule(any(ListTargetsByRuleRequest.class)))
-                .thenReturn(ListTargetsByRuleResponse.builder().build());
-
-        cloudWatchEventsProxy.listTargetsByRule("someRuleName");
-
-        verify(mockCloudWatchEventsClient, times(1)).listTargetsByRule(any(ListTargetsByRuleRequest.class));
-    }
-
-    @Test(expected = SdkException.class)
-    public void test_listTargetsByRule_throws_SdkException_when_call_to_cloud_watch_events_fails() {
-
-        when(mockCloudWatchEventsClient.listTargetsByRule(any(ListTargetsByRuleRequest.class))).thenThrow(SdkException.builder().build());
-
-        final List<Target> targets =  cloudWatchEventsProxy.listTargetsByRule("someRuleName");
-
-        verify(mockCloudWatchEventsClient, times(1)).listTargetsByRule(any(ListTargetsByRuleRequest.class));
-        assertThat(targets, is(notNullValue()));
-    }
 
     @Test
     public void test_deleteRule_is_successful() {

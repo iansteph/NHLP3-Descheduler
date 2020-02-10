@@ -14,6 +14,7 @@ public class PlayEvent {
     public PlayEvent() {}
 
     public PlayEvent(final int gamePk) {
+
         this.gamePk = gamePk;
     }
 

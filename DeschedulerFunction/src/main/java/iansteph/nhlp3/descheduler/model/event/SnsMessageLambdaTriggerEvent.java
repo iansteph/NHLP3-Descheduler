@@ -1,29 +1,23 @@
 package iansteph.nhlp3.descheduler.model.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SqsDeschedulerEvent implements DeschedulerEvent {
+public class SnsMessageLambdaTriggerEvent {
 
-    private List<SqsRecord> records;
+    @JsonProperty(value = "Records")
+    private List<Record> records;
 
-    @Override
-    public String getPlayEventString() {
-
-        // The SQS queue in this application is configured to only return one record per lambda invocation
-        return records.get(0).getPlayEventString();
-    }
-
-    @Override
-    public List<? extends Record> getRecords() {
+    public List<Record> getRecords() {
 
         return records;
     }
 
-    public void setRecords(final List<SqsRecord> records) {
+    public void setRecords(final List<Record> records) {
 
         this.records = records;
     }
@@ -31,7 +25,7 @@ public class SqsDeschedulerEvent implements DeschedulerEvent {
     @Override
     public String toString() {
 
-        return "SqsDeschedulerEvent{" +
+        return "SnsMessageLambdaTriggerEvent{" +
                 "records=" + records +
                 '}';
     }
@@ -41,7 +35,7 @@ public class SqsDeschedulerEvent implements DeschedulerEvent {
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SqsDeschedulerEvent that = (SqsDeschedulerEvent) o;
+        SnsMessageLambdaTriggerEvent that = (SnsMessageLambdaTriggerEvent) o;
         return Objects.equals(records, that.records);
     }
 

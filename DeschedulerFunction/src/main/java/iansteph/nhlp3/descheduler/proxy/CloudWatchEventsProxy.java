@@ -6,13 +6,8 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.cloudwatchevents.CloudWatchEventsClient;
 import software.amazon.awssdk.services.cloudwatchevents.model.DeleteRuleRequest;
 import software.amazon.awssdk.services.cloudwatchevents.model.DeleteRuleResponse;
-import software.amazon.awssdk.services.cloudwatchevents.model.ListTargetsByRuleRequest;
-import software.amazon.awssdk.services.cloudwatchevents.model.ListTargetsByRuleResponse;
 import software.amazon.awssdk.services.cloudwatchevents.model.RemoveTargetsRequest;
 import software.amazon.awssdk.services.cloudwatchevents.model.RemoveTargetsResponse;
-import software.amazon.awssdk.services.cloudwatchevents.model.Target;
-
-import java.util.List;
 
 import static java.lang.String.format;
 
@@ -27,25 +22,6 @@ public class CloudWatchEventsProxy {
     public CloudWatchEventsProxy(final CloudWatchEventsClient cloudWatchEventsClient) {
 
         this.cloudWatchEventsClient = cloudWatchEventsClient;
-    }
-
-    public List<Target> listTargetsByRule(final String ruleName) {
-
-        try {
-
-            final ListTargetsByRuleRequest listTargetsByRuleRequest = ListTargetsByRuleRequest.builder()
-                    .rule(ruleName)
-                    .build();
-            logger.info(format("ListTargetsByRule request: %s", listTargetsByRuleRequest));
-            final ListTargetsByRuleResponse listTargetsByRuleResponse = cloudWatchEventsClient.listTargetsByRule(listTargetsByRuleRequest);
-            logger.info(format("ListTargetsByRule response: %s", listTargetsByRuleResponse));
-            return listTargetsByRuleResponse.targets();
-        }
-        catch (SdkException e) {
-
-            logger.error(e);
-            throw e;
-        }
     }
 
     public void deleteRule(final String ruleName) {

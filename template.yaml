@@ -39,68 +39,9 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - events:ListTargetsByRule
                   - events:RemoveTargets
                   - events:DeleteRule
                 Resource: '*'
-              - Effect: Allow
-                Action:
-                  - sqs:SendMessage
-                  - sqs:ReceiveMessage # https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-permissions
-                  - sqs:DeleteMessage # https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-permissions
-                  - sqs:GetQueueAttributes # https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-permissions
-                Resource:
-                  Fn::GetAtt:
-                    - DeschedulingQueue
-                    - Arn
-
-  DeschedulingQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: NHLP3-Descheduling
-      VisibilityTimeout: 360 # See: https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#events-sqs-queueconfig
-      RedrivePolicy:
-        deadLetterTargetArn:
-          Fn::GetAtt:
-            - DeschedulingQueueDlq
-            - Arn
-        maxReceiveCount: 5
-
-  DeschedulingQueuePolicy:
-    Type: AWS::SQS::QueuePolicy
-    Properties:
-      Queues:
-        - Ref: DeschedulingQueue
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS:
-                Fn::GetAtt:
-                  - DeschedulerFunctionExecutionRole
-                  - Arn
-
-  DeschedulingQueueDlq:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: NHLP3-Descheduling-DLQ
-      MessageRetentionPeriod: 1209600
-
-  DeschedulingQueueDlqPolicy:
-    Type: AWS::SQS::QueuePolicy
-    Properties:
-      Queues:
-        - Ref: DeschedulingQueueDlq
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS:
-                Fn::GetAtt:
-                  - DeschedulerFunctionExecutionRole
-                  - Arn
 
   NHLP3PlayByPlayGameFinalEventSnsSubscription:
     Type: AWS::SNS::Subscription
@@ -125,17 +66,3 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: sns.amazonaws.com
       SourceArn: arn:aws:sns:us-east-1:627812672245:NHLP3-Play-by-Play-Events-prod
-
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html
-  DeschedulingQueueSqsEventSourceMapping:
-    Type: AWS::Lambda::EventSourceMapping
-    Properties:
-      BatchSize: 1
-      EventSourceArn:
-        Fn::GetAtt:
-          - DeschedulingQueue
-          - Arn
-      FunctionName:
-        Fn::GetAtt:
-          - DeschedulerFunction
-          - Arn
