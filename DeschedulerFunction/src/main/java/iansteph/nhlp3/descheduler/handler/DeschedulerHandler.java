@@ -70,6 +70,7 @@ public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTrigge
 
         logger.info(format("Handling event: %s", snsMessageLambdaTriggerEvent));
 
+        // TODO | Temporarily remove for testing
 //        // SNS only has one record per invocation when configured as event source for lambda
 //        final PlayEvent playEvent = snsMessageLambdaTriggerEvent.getRecords().get(0).getSns().getMessage();
 //        validatePlayEvent(playEvent);
