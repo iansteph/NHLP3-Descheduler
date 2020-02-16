@@ -70,29 +70,30 @@ public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTrigge
 
         logger.info(format("Handling event: %s", snsMessageLambdaTriggerEvent));
 
-        // SNS only has one record per invocation when configured as event source for lambda
-        final PlayEvent playEvent = snsMessageLambdaTriggerEvent.getRecords().get(0).getSns().getMessage();
-        validatePlayEvent(playEvent);
-        logger.info(format("Processing GameId %d and PlayEvent %s", playEvent.getGamePk(), playEvent));
-        final String ruleName = "GameId-" + playEvent.getGamePk();
-
-        // Remove Targets for Rule so it can be deleted
-        logger.info(format("Removing existing target for event rule: %s", ruleName));
-        cloudWatchEventsProxy.removeTargets(ruleName);
-        logger.info(format("Targets removed for event rule: %s", ruleName));
-
-        // Wait for Target removal to propagate through CloudWatch
-        final int numberOfMillisecondsToWait = 1000 * 60 * 3;
-        logger.info(format("Waiting for %s milliseconds before deleting rule to allow target removal to propagate",
-                numberOfMillisecondsToWait));
-        sleeper.sleep(numberOfMillisecondsToWait);
-
-        // Delete Rule
-        logger.info(format("Deleting Rule %s", ruleName));
-        cloudWatchEventsProxy.deleteRule(ruleName);
-        logger.info(format("%s deleted successfully", ruleName));
-
-        return playEvent;
+//        // SNS only has one record per invocation when configured as event source for lambda
+//        final PlayEvent playEvent = snsMessageLambdaTriggerEvent.getRecords().get(0).getSns().getMessage();
+//        validatePlayEvent(playEvent);
+//        logger.info(format("Processing GameId %d and PlayEvent %s", playEvent.getGamePk(), playEvent));
+//        final String ruleName = "GameId-" + playEvent.getGamePk();
+//
+//        // Remove Targets for Rule so it can be deleted
+//        logger.info(format("Removing existing target for event rule: %s", ruleName));
+//        cloudWatchEventsProxy.removeTargets(ruleName);
+//        logger.info(format("Targets removed for event rule: %s", ruleName));
+//
+//        // Wait for Target removal to propagate through CloudWatch
+//        final int numberOfMillisecondsToWait = 1000 * 60 * 3;
+//        logger.info(format("Waiting for %s milliseconds before deleting rule to allow target removal to propagate",
+//                numberOfMillisecondsToWait));
+//        sleeper.sleep(numberOfMillisecondsToWait);
+//
+//        // Delete Rule
+//        logger.info(format("Deleting Rule %s", ruleName));
+//        cloudWatchEventsProxy.deleteRule(ruleName);
+//        logger.info(format("%s deleted successfully", ruleName));
+//
+//        return playEvent;
+        return null;
     }
 
     private void validatePlayEvent(final PlayEvent playEvent) {
