@@ -10,14 +10,14 @@ import java.util.Objects;
 public class SnsMessageLambdaTriggerEvent {
 
     @JsonProperty(value = "Records")
-    private List<Record> records;
+    private String records;
 
-    public List<Record> getRecords() {
+    public String getRecords() {
 
         return records;
     }
 
-    public void setRecords(final List<Record> records) {
+    public void setRecords(final String records) {
 
         this.records = records;
     }
