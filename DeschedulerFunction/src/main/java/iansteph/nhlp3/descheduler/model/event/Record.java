@@ -2,6 +2,7 @@ package iansteph.nhlp3.descheduler.model.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import iansteph.nhlp3.descheduler.model.event.sns.Sns;
 
 import java.util.Objects;
 
@@ -9,14 +10,14 @@ import java.util.Objects;
 public class Record {
 
     @JsonProperty(value = "Sns")
-    private String sns;
+    private Sns sns;
 
-    public String getSns() {
+    public Sns getSns() {
 
         return sns;
     }
 
-    public void setSns(final String sns) {
+    public void setSns(final Sns sns) {
 
         this.sns = sns;
     }
