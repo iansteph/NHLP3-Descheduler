@@ -3,7 +3,7 @@ package iansteph.nhlp3.descheduler.deserialization;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import iansteph.nhlp3.descheduler.UnitTestBase;
-import iansteph.nhlp3.descheduler.model.event.String;
+import iansteph.nhlp3.descheduler.model.event.PlayEvent;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,10 +22,10 @@ public class PlayEventDeserializerTest extends UnitTestBase {
     public void test_deserialize_successfully_deserializes_play_event_from_escaped_json() throws IOException {
 
         final JsonParser mockJsonParser = mock(JsonParser.class);
-        final java.lang.String playEventString = getTestResourceAsString("play-event.txt");
+        final String playEventString = getTestResourceAsString("play-event.txt");
         when(mockJsonParser.getText()).thenReturn(playEventString);
 
-        final String result = playEventDeserializer.deserialize(mockJsonParser, null);
+        final PlayEvent result = playEventDeserializer.deserialize(mockJsonParser, null);
 
         assertThat(result, is(notNullValue()));
         assertThat(result.getGamePk(), is(notNullValue()));
@@ -35,7 +35,7 @@ public class PlayEventDeserializerTest extends UnitTestBase {
     public void test_deserialize_throws_JsonProcessingException_when_deserializing_unescaped_json() throws IOException {
 
         final JsonParser mockJsonParser = mock(JsonParser.class);
-        final java.lang.String playEventString = getTestResourceAsString("unescaped-play-event.txt");
+        final String playEventString = getTestResourceAsString("unescaped-play-event.txt");
         when(mockJsonParser.getText()).thenReturn(playEventString);
 
         playEventDeserializer.deserialize(mockJsonParser, null);

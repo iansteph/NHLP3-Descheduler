@@ -1,27 +1,30 @@
 package iansteph.nhlp3.descheduler.model.event.sns;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import iansteph.nhlp3.descheduler.model.event.String;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import iansteph.nhlp3.descheduler.deserialization.PlayEventDeserializer;
+import iansteph.nhlp3.descheduler.model.event.PlayEvent;
 
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sns {
 
-    private String Message;
+    @JsonDeserialize(using = PlayEventDeserializer.class)
+    private PlayEvent Message;
 
-    public String getMessage() {
+    public PlayEvent getMessage() {
 
         return Message;
     }
 
-    public void setMessage(final String message) {
+    public void setMessage(final PlayEvent message) {
 
         this.Message = message;
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
 
         return "Sns{" +
                 "Message=" + Message +

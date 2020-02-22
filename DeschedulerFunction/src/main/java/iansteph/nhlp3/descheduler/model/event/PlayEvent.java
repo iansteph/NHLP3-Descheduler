@@ -6,14 +6,14 @@ import iansteph.nhlp3.eventpublisher.model.nhl.livedata.plays.Play;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class String {
+public class PlayEvent {
 
     private Integer gamePk;
     private Play play;
 
-    public String() {}
+    public PlayEvent() {}
 
-    public String(final int gamePk) {
+    public PlayEvent(final int gamePk) {
 
         this.gamePk = gamePk;
     }
@@ -28,7 +28,7 @@ public class String {
         this.gamePk = gamePk;
     }
 
-    public String withGamePk(final int gamePk) {
+    public PlayEvent withGamePk(final int gamePk) {
 
         this.gamePk = gamePk;
         return this;
@@ -44,14 +44,14 @@ public class String {
         this.play = play;
     }
 
-    public String withPlay(final Play play) {
+    public PlayEvent withPlay(final Play play) {
 
         this.play = play;
         return this;
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
 
         return "PlayEvent{" +
                 "gamePk=" + gamePk +
@@ -64,7 +64,7 @@ public class String {
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        String playEvent = (String) o;
+        PlayEvent playEvent = (PlayEvent) o;
         return Objects.equals(gamePk, playEvent.gamePk) &&
                 Objects.equals(play, playEvent.play);
     }
