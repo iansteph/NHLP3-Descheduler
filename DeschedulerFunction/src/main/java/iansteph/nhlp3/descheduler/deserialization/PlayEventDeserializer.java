@@ -6,20 +6,20 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import iansteph.nhlp3.descheduler.model.event.PlayEvent;
+import iansteph.nhlp3.descheduler.model.event.String;
 
 import java.io.IOException;
 
-public class PlayEventDeserializer extends JsonDeserializer<PlayEvent> {
+public class PlayEventDeserializer extends JsonDeserializer<String> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Override
-    public PlayEvent deserialize(
+    public String deserialize(
         final JsonParser jsonParser,
         final DeserializationContext deserializationContext
     ) throws IOException, JsonProcessingException {
 
-        return objectMapper.readValue(jsonParser.getText(), PlayEvent.class);
+        return objectMapper.readValue(jsonParser.getText(), String.class);
     }
 }

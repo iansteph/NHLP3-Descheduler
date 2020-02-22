@@ -4,8 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import iansteph.nhlp3.descheduler.model.event.PlayEvent;
-import iansteph.nhlp3.descheduler.model.event.SnsMessageLambdaTriggerEvent;
+import iansteph.nhlp3.descheduler.model.event.String;
 import iansteph.nhlp3.descheduler.proxy.CloudWatchEventsProxy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +24,7 @@ import static java.lang.String.format;
 /**
  * Handler for requests to Lambda function.
  */
-public class DeschedulerHandler implements RequestHandler<String, Object> {
+public class DeschedulerHandler implements RequestHandler<java.lang.String, Object> {
 
     private final CloudWatchEventsProxy cloudWatchEventsProxy;
     private final ObjectMapper objectMapper;
@@ -66,7 +65,7 @@ public class DeschedulerHandler implements RequestHandler<String, Object> {
         this.sleeper = sleeper;
     }
 
-    public PlayEvent handleRequest(final String snsMessageLambdaTriggerEvent, final Context context) {
+    public String handleRequest(final java.lang.String snsMessageLambdaTriggerEvent, final Context context) {
 
         logger.info(format("Handling event: %s", snsMessageLambdaTriggerEvent));
 
@@ -96,7 +95,7 @@ public class DeschedulerHandler implements RequestHandler<String, Object> {
         return null;
     }
 
-    private void validatePlayEvent(final PlayEvent playEvent) {
+    private void validatePlayEvent(final String playEvent) {
 
         try {
 
