@@ -11,14 +11,14 @@ import java.util.Objects;
 public class Sns {
 
     @JsonDeserialize(using = PlayEventDeserializer.class)
-    private PlayEvent Message;
+    private String Message;
 
-    public PlayEvent getMessage() {
+    public String getMessage() {
 
         return Message;
     }
 
-    public void setMessage(final PlayEvent message) {
+    public void setMessage(final String message) {
 
         this.Message = message;
     }
