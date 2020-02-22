@@ -1,7 +1,6 @@
 package iansteph.nhlp3.descheduler.model.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import iansteph.nhlp3.descheduler.model.event.sns.Sns;
 
 import java.util.Objects;
@@ -9,24 +8,23 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Record {
 
-    @JsonProperty(value = "Sns")
-    private Sns sns;
+    private Sns Sns;
 
     public Sns getSns() {
 
-        return sns;
+        return Sns;
     }
 
     public void setSns(final Sns sns) {
 
-        this.sns = sns;
+        this.Sns = sns;
     }
 
     @Override
     public String toString() {
 
         return "Record{" +
-                "sns=" + sns +
+                "Sns=" + Sns +
                 '}';
     }
 
@@ -36,12 +34,12 @@ public class Record {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Record record = (Record) o;
-        return Objects.equals(sns, record.sns);
+        return Objects.equals(Sns, record.Sns);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(sns);
+        return Objects.hash(Sns);
     }
 }

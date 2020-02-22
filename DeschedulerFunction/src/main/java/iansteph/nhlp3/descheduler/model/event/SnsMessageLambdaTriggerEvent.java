@@ -1,7 +1,6 @@
 package iansteph.nhlp3.descheduler.model.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,24 +8,23 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SnsMessageLambdaTriggerEvent {
 
-    @JsonProperty(value = "Records")
-    private String records;
+    private List<Record> Records;
 
-    public String getRecords() {
+    public List<Record> getRecords() {
 
-        return records;
+        return Records;
     }
 
-    public void setRecords(final String records) {
+    public void setRecords(final List<Record> records) {
 
-        this.records = records;
+        this.Records = records;
     }
 
     @Override
     public String toString() {
 
         return "SnsMessageLambdaTriggerEvent{" +
-                "records=" + records +
+                "Records=" + Records +
                 '}';
     }
 
@@ -36,12 +34,12 @@ public class SnsMessageLambdaTriggerEvent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SnsMessageLambdaTriggerEvent that = (SnsMessageLambdaTriggerEvent) o;
-        return Objects.equals(records, that.records);
+        return Objects.equals(Records, that.Records);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(records);
+        return Objects.hash(Records);
     }
 }

@@ -1,7 +1,6 @@
 package iansteph.nhlp3.descheduler.model.event.sns;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import iansteph.nhlp3.descheduler.deserialization.PlayEventDeserializer;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
@@ -11,25 +10,24 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sns {
 
-    @JsonProperty(value = "Message")
     @JsonDeserialize(using = PlayEventDeserializer.class)
-    private PlayEvent message;
+    private PlayEvent Message;
 
     public PlayEvent getMessage() {
 
-        return message;
+        return Message;
     }
 
     public void setMessage(final PlayEvent message) {
 
-        this.message = message;
+        this.Message = message;
     }
 
     @Override
     public String toString() {
 
         return "Sns{" +
-                "message=" + message +
+                "Message=" + Message +
                 '}';
     }
 
@@ -39,12 +37,12 @@ public class Sns {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Sns sns = (Sns) o;
-        return Objects.equals(message, sns.message);
+        return Objects.equals(Message, sns.Message);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(message);
+        return Objects.hash(Message);
     }
 }
