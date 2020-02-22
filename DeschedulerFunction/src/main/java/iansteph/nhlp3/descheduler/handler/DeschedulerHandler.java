@@ -25,7 +25,7 @@ import static java.lang.String.format;
 /**
  * Handler for requests to Lambda function.
  */
-public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTriggerEvent, Object> {
+public class DeschedulerHandler implements RequestHandler<String, Object> {
 
     private final CloudWatchEventsProxy cloudWatchEventsProxy;
     private final ObjectMapper objectMapper;
@@ -66,7 +66,7 @@ public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTrigge
         this.sleeper = sleeper;
     }
 
-    public PlayEvent handleRequest(final SnsMessageLambdaTriggerEvent snsMessageLambdaTriggerEvent, final Context context) {
+    public PlayEvent handleRequest(final String snsMessageLambdaTriggerEvent, final Context context) {
 
         logger.info(format("Handling event: %s", snsMessageLambdaTriggerEvent));
 
