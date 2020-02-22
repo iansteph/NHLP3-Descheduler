@@ -10,7 +10,6 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sns {
 
-    @JsonDeserialize(using = PlayEventDeserializer.class)
     private String Message;
 
     public String getMessage() {
