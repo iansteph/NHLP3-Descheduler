@@ -18,6 +18,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchevents.CloudWatchEventsClient;
 import software.amazon.awssdk.utils.AttributeMap;
 
+import java.io.IOException;
 import java.net.URI;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -70,6 +71,14 @@ public class DeschedulerHandler implements RequestHandler<SNSEvent, Object> {
     public PlayEvent handleRequest(final SNSEvent snsEvent, final Context context) {
 
         logger.info(format("Handling event: %s", snsEvent));
+        final String message = snsEvent.getRecords().get(0).getSNS().getMessage();
+        logger.info(format("Deserializing SNS event's message field: %s", message));
+        try {
+            final PlayEvent playEvent = objectMapper.readValue(message, PlayEvent.class);
+            logger.info(format("Deserialized PlayEvent: %s", playEvent));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 //        // SNS only has one record per invocation when configured as event source for lambda
 //        final PlayEvent playEvent = snsMessageLambdaTriggerEvent.getRecords().get(0).getSns().getMessage();
