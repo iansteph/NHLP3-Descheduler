@@ -2,6 +2,7 @@ package iansteph.nhlp3.descheduler.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
@@ -25,7 +26,7 @@ import static java.lang.String.format;
 /**
  * Handler for requests to Lambda function.
  */
-public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTriggerEvent, Object> {
+public class DeschedulerHandler implements RequestHandler<SNSEvent, Object> {
 
     private final CloudWatchEventsProxy cloudWatchEventsProxy;
     private final ObjectMapper objectMapper;
@@ -66,9 +67,9 @@ public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTrigge
         this.sleeper = sleeper;
     }
 
-    public PlayEvent handleRequest(final SnsMessageLambdaTriggerEvent snsMessageLambdaTriggerEvent, final Context context) {
+    public PlayEvent handleRequest(final SNSEvent snsEvent, final Context context) {
 
-        logger.info(format("Handling event: %s", snsMessageLambdaTriggerEvent));
+        logger.info(format("Handling event: %s", snsEvent));
 
 //        // SNS only has one record per invocation when configured as event source for lambda
 //        final PlayEvent playEvent = snsMessageLambdaTriggerEvent.getRecords().get(0).getSns().getMessage();
