@@ -6,7 +6,6 @@ import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
-import iansteph.nhlp3.descheduler.model.event.SnsMessageLambdaTriggerEvent;
 import iansteph.nhlp3.descheduler.proxy.CloudWatchEventsProxy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,39 +70,47 @@ public class DeschedulerHandler implements RequestHandler<SNSEvent, Object> {
     public PlayEvent handleRequest(final SNSEvent snsEvent, final Context context) {
 
         logger.info(format("Handling event: %s", snsEvent));
+
+        // SNS only has one record per invocation when configured as event source for lambda
         final String message = snsEvent.getRecords().get(0).getSNS().getMessage();
-        logger.info(format("Deserializing SNS event's message field: %s", message));
+        final PlayEvent playEvent = extractPlayEventFromMessage(message);
+        validatePlayEvent(playEvent);
+        logger.info(format("Processing GameId %d and PlayEvent %s", playEvent.getGamePk(), playEvent));
+        final String ruleName = "GameId-" + playEvent.getGamePk();
+
+        // Remove Targets for Rule so it can be deleted
+        logger.info(format("Removing existing target for event rule: %s", ruleName));
+        cloudWatchEventsProxy.removeTargets(ruleName);
+        logger.info(format("Targets removed for event rule: %s", ruleName));
+
+        // Wait for Target removal to propagate through CloudWatch
+        final int numberOfMillisecondsToWait = 1000 * 60 * 3;
+        logger.info(format("Waiting for %s milliseconds before deleting rule to allow target removal to propagate",
+                numberOfMillisecondsToWait));
+        sleeper.sleep(numberOfMillisecondsToWait);
+
+        // Delete Rule
+        logger.info(format("Deleting Rule %s", ruleName));
+        cloudWatchEventsProxy.deleteRule(ruleName);
+        logger.info(format("%s deleted successfully", ruleName));
+
+        return playEvent;
+    }
+
+    private PlayEvent extractPlayEventFromMessage(final String message) {
+
         try {
+
+
+            logger.info(format("Deserializing SNS event's message field: %s", message));
             final PlayEvent playEvent = objectMapper.readValue(message, PlayEvent.class);
             logger.info(format("Deserialized PlayEvent: %s", playEvent));
+            return playEvent;
         } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-//        // SNS only has one record per invocation when configured as event source for lambda
-//        final PlayEvent playEvent = snsMessageLambdaTriggerEvent.getRecords().get(0).getSns().getMessage();
-//        validatePlayEvent(playEvent);
-//        logger.info(format("Processing GameId %d and PlayEvent %s", playEvent.getGamePk(), playEvent));
-//        final String ruleName = "GameId-" + playEvent.getGamePk();
-//
-//        // Remove Targets for Rule so it can be deleted
-//        logger.info(format("Removing existing target for event rule: %s", ruleName));
-//        cloudWatchEventsProxy.removeTargets(ruleName);
-//        logger.info(format("Targets removed for event rule: %s", ruleName));
-//
-//        // Wait for Target removal to propagate through CloudWatch
-//        final int numberOfMillisecondsToWait = 1000 * 60 * 3;
-//        logger.info(format("Waiting for %s milliseconds before deleting rule to allow target removal to propagate",
-//                numberOfMillisecondsToWait));
-//        sleeper.sleep(numberOfMillisecondsToWait);
-//
-//        // Delete Rule
-//        logger.info(format("Deleting Rule %s", ruleName));
-//        cloudWatchEventsProxy.deleteRule(ruleName);
-//        logger.info(format("%s deleted successfully", ruleName));
-//
-//        return playEvent;
-        return null;
+            logger.error(format("Exception thrown during deserialization of message: %s", message), e);
+            throw new RuntimeException(e);
+        }
     }
 
     private void validatePlayEvent(final PlayEvent playEvent) {
