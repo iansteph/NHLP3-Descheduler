@@ -5,7 +5,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
-import iansteph.nhlp3.descheduler.model.event.SnsMessageLambdaTriggerEvent;
 import iansteph.nhlp3.descheduler.proxy.CloudWatchEventsProxy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,10 +67,11 @@ public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTrigge
 
     public PlayEvent handleRequest(final SnsMessageLambdaTriggerEvent snsMessageLambdaTriggerEvent, final Context context) {
 
-        logger.info(format("Handling event: %s", snsMessageLambdaTriggerEvent));
+        logger.info(format("Handling event: %s", snsEvent));
 
         // SNS only has one record per invocation when configured as event source for lambda
-        final PlayEvent playEvent = snsMessageLambdaTriggerEvent.getRecords().get(0).getSns().getMessage();
+        final String message = snsEvent.getRecords().get(0).getSNS().getMessage();
+        final PlayEvent playEvent = extractPlayEventFromMessage(message);
         validatePlayEvent(playEvent);
         logger.info(format("Processing GameId %d and PlayEvent %s", playEvent.getGamePk(), playEvent));
         final String ruleName = "GameId-" + playEvent.getGamePk();
@@ -93,6 +93,22 @@ public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTrigge
         logger.info(format("%s deleted successfully", ruleName));
 
         return playEvent;
+    }
+
+    private PlayEvent extractPlayEventFromMessage(final String message) {
+
+        try {
+
+
+            logger.info(format("Deserializing SNS event's message field: %s", message));
+            final PlayEvent playEvent = objectMapper.readValue(message, PlayEvent.class);
+            logger.info(format("Deserialized PlayEvent: %s", playEvent));
+            return playEvent;
+        } catch (IOException e) {
+
+            logger.error(format("Exception thrown during deserialization of message: %s", message), e);
+            throw new RuntimeException(e);
+        }
     }
 
     private void validatePlayEvent(final PlayEvent playEvent) {
