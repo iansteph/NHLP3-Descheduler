@@ -15,7 +15,7 @@ Resources:
         Fn::GetAtt:
           - DeschedulerFunctionExecutionRole
           - Arn
-      Timeout: 60
+      Timeout: 300
 
   DeschedulerFunctionExecutionRole:
     Type: AWS::IAM::Role
