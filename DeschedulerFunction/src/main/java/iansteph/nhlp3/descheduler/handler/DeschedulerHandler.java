@@ -2,6 +2,7 @@ package iansteph.nhlp3.descheduler.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import iansteph.nhlp3.descheduler.model.event.PlayEvent;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchevents.CloudWatchEventsClient;
 import software.amazon.awssdk.utils.AttributeMap;
 
+import java.io.IOException;
 import java.net.URI;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -24,7 +26,7 @@ import static java.lang.String.format;
 /**
  * Handler for requests to Lambda function.
  */
-public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTriggerEvent, Object> {
+public class DeschedulerHandler implements RequestHandler<SNSEvent, Object> {
 
     private final CloudWatchEventsProxy cloudWatchEventsProxy;
     private final ObjectMapper objectMapper;
@@ -65,7 +67,7 @@ public class DeschedulerHandler implements RequestHandler<SnsMessageLambdaTrigge
         this.sleeper = sleeper;
     }
 
-    public PlayEvent handleRequest(final SnsMessageLambdaTriggerEvent snsMessageLambdaTriggerEvent, final Context context) {
+    public PlayEvent handleRequest(final SNSEvent snsEvent, final Context context) {
 
         logger.info(format("Handling event: %s", snsEvent));
 
