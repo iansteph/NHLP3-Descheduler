@@ -15,7 +15,8 @@ public class CloudWatchEventsProxy {
 
     private final CloudWatchEventsClient cloudWatchEventsClient;
 
-    private static final String TARGET_ID = "Event-Publisher-Lambda-Function";
+    private static final String EVENT_PUBLISHER_TARGET_ID = "Event-Publisher-Lambda-Function";
+    private static final String SHIFT_PUBLISHER_TARGET_ID = "Shift-Publisher-Lambda-Function";
 
     private static final Logger logger = LogManager.getLogger(CloudWatchEventsProxy.class);
 
@@ -48,7 +49,7 @@ public class CloudWatchEventsProxy {
 
             final RemoveTargetsRequest removeTargetsRequest = RemoveTargetsRequest.builder()
                     .rule(ruleName)
-                    .ids(TARGET_ID)
+                    .ids(EVENT_PUBLISHER_TARGET_ID, SHIFT_PUBLISHER_TARGET_ID)
                     .build();
             logger.info(format("RemoveTargets request: %s", removeTargetsRequest));
             final RemoveTargetsResponse removeTargetsResponse = cloudWatchEventsClient.removeTargets(removeTargetsRequest);
